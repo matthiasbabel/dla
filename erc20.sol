@@ -10,17 +10,24 @@ pragma solidity >=0.8.2 <0.9.0;
 contract OffSetting {
 
     uint public totalSupply;
-    mapping(address => uint) public balanceOf;
+    mapping(address => uint256) private balances;
 
     constructor() {
         totalSupply = 100;
+        balances[msg.sender] = totalSupply;
     }
 
-    balanceOf(address _owner) public view returns ()
+    function balanceOf(address _owner) public view returns (uint256) {
+        return balances[_owner];
+    } 
 
-    function transfer(address _to, uint256 _amount) returns (bool success) {
-        require(balanceOf[])
+    function transfer(address _to, uint256 _amount) public returns (bool success) {
+        
+        require(balanceOf(msg.sender) >= _amount, "Not enough funds");
+
+        balances[msg.sender] -= _amount;
+        balances[_to] += _amount;
+        
         return true;
     }
-
 }
