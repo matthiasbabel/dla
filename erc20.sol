@@ -6,15 +6,23 @@ contract OffSetting {
 
     uint public totalSupply;
     address owner;
+    //address payable owner;
     mapping(address => bool) public allowancesMint;
     mapping(address => uint256) public prices;
     mapping(address => uint256) private balances;
     mapping(address => mapping(address => uint256)) public allowancesBurn;
+    mapping(address => Mint[]) public mints;
+    struct Mint {
+        uint256 amount;
+        string description;
+        uint256 time;
+    }
 
     constructor() {
         totalSupply = 100;
         balances[msg.sender] = totalSupply;
         owner = msg.sender;
+        //owner = payable(msg.sender);
     }
 
     function balanceOf(address _owner) public view returns (uint256) {
@@ -35,19 +43,19 @@ contract OffSetting {
         balances[msg.sender] -= _amount;
     }
 
-    // Task3 - Trading of offsets
+    // Task 3 - Trading of offsets
     // Set Price
     function setPrice(uint256 _price) public {
         prices[msg.sender] = _price;
     }
 
-    // Task3
+    // Task 3
     // Buy offsets. if price = 0: Buying not possible
     function buy(address payable _from) public payable returns(bool success) {
         uint256 price = prices[_from];
         require(price != 0, "Not possible");
         uint256 amount = msg.value / price;
-        require(balances[_from] <= amount, "Not enough offsets");
+        require(balances[_from] > amount, "Not enough offsets");
         
         balances[msg.sender] += amount;
         balances[_from] -= amount;
@@ -55,18 +63,19 @@ contract OffSetting {
         return _from.send(msg.value);
     }
 
-    // Task2 
+    // Task 2 
     // Allow selected parties to mint offsets (only by contract owner)
     function allowMinting(address _minter) public {
         require(msg.sender == owner, "No permission");
         allowancesMint[_minter] = true;
     }
 
-    // Task2
+    // Task 2
     // Implement Minting for authorized addresses
     function mint(uint256 _amount) public {
         require(allowancesMint[msg.sender], "No allowance for minting");
         balances[msg.sender] += _amount;
+        totalSupply += _amount;
     }
 
     // Task 1
@@ -82,10 +91,36 @@ contract OffSetting {
         require(allowancesBurn[_from][msg.sender] >= _amount, "No allowance");
         allowancesBurn[_from][msg.sender] -= _amount;
         balances[_from] -= _amount;
+        totalSupply -= _amount;
         return allowancesBurn[_from][msg.sender];
     }
-
+/*
     // Task 4
     // Add a Struct, which logs all minting events. Amount, Minter, Description
     // TODO: Implement
+    function mint(uint256 _amount, string memory _description) public {
+        mint(_amount);
+        mints[msg.sender].push(Mint(_amount, _description, block.timestamp));
+    }
+
+    // Task 5 
+    // Let the SC receive a 10% fee of each payment through the buy function
+    // Write a function to return all funds from the SC to its owner
+    function buyFee(address payable _from) public payable returns (bool) {
+        uint256 price = prices[_from];
+        require(price != 0, "Not possible");
+        uint256 amount = msg.value / price;
+        require(balances[_from] > amount, "Not enough offsets");
+        
+        balances[msg.sender] += amount;
+        balances[_from] -= amount;
+
+        return _from.send((msg.value / 10) * 9);
+    }
+
+    function withdraw() public returns (bool) {
+        require(msg.sender == owner);
+        return owner.send(address(this).balance);
+    }
+    */
 }   
