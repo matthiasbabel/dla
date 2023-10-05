@@ -2,11 +2,6 @@
 
 pragma solidity >=0.8.2 <0.9.0;
 
-/**
- * @title Storage
- * @dev Store & retrieve value in a variable
- * @custom:dev-run-script ./scripts/deploy_with_ethers.ts
- */
 contract OffSetting {
 
     uint public totalSupply;
@@ -34,6 +29,10 @@ contract OffSetting {
         balances[_to] += _amount;
         
         return true;
+    }
+
+    function burn(uint256 _amount) public {
+        balances[msg.sender] -= _amount;
     }
 
     // Task3 - Trading of offsets
@@ -70,10 +69,6 @@ contract OffSetting {
         balances[msg.sender] += _amount;
     }
 
-    function burn(uint256 _amount) public {
-        balances[msg.sender] -= _amount;
-    }
-
     // Task 1
     // Give some third party the allowance to burn your offset 
     function addAllowBurn(address _burner, uint256 _amount) public returns (uint256) {
@@ -86,10 +81,11 @@ contract OffSetting {
     function burnFrom(address _from, uint256 _amount) public returns (uint256) {
         require(allowancesBurn[_from][msg.sender] >= _amount, "No allowance");
         allowancesBurn[_from][msg.sender] -= _amount;
+        balances[_from] -= _amount;
         return allowancesBurn[_from][msg.sender];
     }
 
     // Task 4
     // Add a Struct, which logs all minting events. Amount, Minter, Description
     // TODO: Implement
-}
+}   
