@@ -39,20 +39,21 @@ contract OffSetting {
     // Task3 - Trading of offsets
     // Set Price
     function setPrice(uint256 _price) public {
-        prices[msg.sender] = _price
+        prices[msg.sender] = _price;
     }
 
     // Task3
     // Buy offsets. if price = 0: Buying not possible
-    function buy(address payable _from) public payable {
-        require(prices[_from] != 0; "Not possible");
-        uint256 amount = msg.value \ price;
+    function buy(address payable _from) public payable returns(bool success) {
+        uint256 price = prices[_from];
+        require(price != 0, "Not possible");
+        uint256 amount = msg.value / price;
         require(balances[_from] <= amount, "Not enough offsets");
         
-        balances[msg.sender] += _amount;
-        balances[_from] -= _amount;
+        balances[msg.sender] += amount;
+        balances[_from] -= amount;
         //ggf. ersetzen mit "Call" https://solidity-by-example.org/sending-ether/
-        _from.send(msg.value);
+        return _from.send(msg.value);
     }
 
     // Task2 
