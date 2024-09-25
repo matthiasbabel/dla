@@ -9,11 +9,11 @@ contract HelloWorld {
         text = "HelloWorld";
     }
 
-    function getText() returns(string memory) {
+    function getText() public view returns(string memory) {
         return text;
     }
 
-    function setText(string memory _newText) {
+    function setText(string memory _newText) public {
         text = _newText;
     }
 }
